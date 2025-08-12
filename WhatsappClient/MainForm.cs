@@ -54,7 +54,7 @@ namespace WhatsAppClient
             };
             // En el constructor o en Load()
             notifyIcon.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
-            timerActualizarMensajesNuevos.Interval = 1500; // por ejemplo cada 3 segundos
+            timerActualizarMensajesNuevos.Interval = 2000; // por ejemplo cada 3 segundos
             timerActualizarMensajesNuevos.Tick += TimerActualizarMensajesNuevos_Tick;
             timerActualizarMensajesNuevos.Start();
             timerResizeDebounce.Interval = 200; // 200 ms tras el último resize

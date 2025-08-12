@@ -28,18 +28,19 @@ namespace WhatsAppClient
             this.userNameShow = new System.Windows.Forms.Label();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.button4 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // listBoxChats
             // 
             this.listBoxChats.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.listBoxChats.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listBoxChats.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listBoxChats.FormattingEnabled = true;
-            this.listBoxChats.ItemHeight = 16;
+            this.listBoxChats.ItemHeight = 17;
             this.listBoxChats.Location = new System.Drawing.Point(38, 12);
             this.listBoxChats.Name = "listBoxChats";
-            this.listBoxChats.Size = new System.Drawing.Size(230, 356);
+            this.listBoxChats.Size = new System.Drawing.Size(230, 361);
             this.listBoxChats.TabIndex = 3;
             this.listBoxChats.SelectedIndexChanged += new System.EventHandler(this.listBoxChats_SelectedIndexChanged);
             // 
@@ -47,19 +48,20 @@ namespace WhatsAppClient
             // 
             this.txtMensaje.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtMensaje.Location = new System.Drawing.Point(277, 348);
+            this.txtMensaje.Location = new System.Drawing.Point(307, 348);
             this.txtMensaje.Name = "txtMensaje";
-            this.txtMensaje.Size = new System.Drawing.Size(371, 20);
+            this.txtMensaje.Size = new System.Drawing.Size(374, 20);
             this.txtMensaje.TabIndex = 5;
             // 
             // btnEnviar
             // 
             this.btnEnviar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnEnviar.Location = new System.Drawing.Point(651, 348);
+            this.btnEnviar.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEnviar.Location = new System.Drawing.Point(687, 348);
             this.btnEnviar.Name = "btnEnviar";
-            this.btnEnviar.Size = new System.Drawing.Size(72, 23);
+            this.btnEnviar.Size = new System.Drawing.Size(36, 20);
             this.btnEnviar.TabIndex = 6;
-            this.btnEnviar.Text = "Send";
+            this.btnEnviar.Text = "➡️";
             this.btnEnviar.UseVisualStyleBackColor = true;
             this.btnEnviar.Click += new System.EventHandler(this.btnEnviar_Click);
             // 
@@ -114,15 +116,28 @@ namespace WhatsAppClient
             this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.flowLayoutPanel1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(277, 35);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(446, 307);
             this.flowLayoutPanel1.TabIndex = 12;
             // 
+            // button4
+            // 
+            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button4.Location = new System.Drawing.Point(277, 348);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(24, 20);
+            this.button4.TabIndex = 13;
+            this.button4.Text = "📂";
+            this.button4.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AcceptButton = this.btnEnviar;
+            this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(735, 388);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.userNameShow);
             this.Controls.Add(this.button3);
@@ -150,5 +165,6 @@ namespace WhatsAppClient
         private Label userNameShow;
         private NotifyIcon notifyIcon1;
         private FlowLayoutPanel flowLayoutPanel1;
+        private Button button4;
     }
 }
