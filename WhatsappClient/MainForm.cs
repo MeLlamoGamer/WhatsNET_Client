@@ -9,12 +9,17 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Runtime.InteropServices;
-
+using System.Threading.Tasks;
 
 namespace WhatsAppClient
 {
     public partial class MainForm : Form
     {
+        private NotifyIcon notifyIcon;
+        private Dictionary<string, string> ultimosMensajes = new Dictionary<string, string>();
+        private Timer timerNuevosMensajes = new Timer();
+        private bool timerNuevosMensajesEjecutandose = false;
+        private bool timerNuevosMensajesIniciado = false;
         private string ServerIP = "whatsnet.arcy-v.win";
         const int WM_VSCROLL = 0x0115;
         const int SB_THUMBPOSITION = 4;
@@ -110,9 +115,20 @@ namespace WhatsAppClient
                 {
                     listBoxChats.TopIndex = scrollIndex;
                 }
+                listBoxChats.TopIndex = scrollIndex;
             }
             catch (HttpRequestException ex)
             {
+                MessageBox.Show("Error al actualizar chats: " + ex.Message);
+            }
+            catch (TaskCanceledException)
+            {
+                // Timeout o cancelación - ignorar o loggear según convenga
+                // Console.WriteLine("Petición cancelada o timeout en TimerActualizarChats_Tick.");
+            }
+            catch (Exception ex)
+            {
+                // Aquí otros errores, p.ej. red
                 MessageBox.Show("Error al actualizar chats: " + ex.Message);
             }
         }
@@ -136,9 +152,20 @@ namespace WhatsAppClient
                     {
                         string from = msg["from"].ToString();
                         string body = msg["body"].ToString();
-                        string who = from == userId ? "Yo" : from;
+                        string fromName = msg["fromName"]?.ToString();
+                        string timestampStr = msg["timestamp"]?.ToString();
+                        string who = from == userId ? "Yo" : (string.IsNullOrEmpty(fromName) ? from : fromName);
 
-                        sb.AppendLine($"{who}: {body}");
+                        string timeFormatted = "";
+
+                        if (long.TryParse(timestampStr, out long ts))
+                        {
+                            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                            DateTime dateTime = epoch.AddSeconds(ts).ToLocalTime();
+                            timeFormatted = dateTime.ToString("HH:mm");
+                        }
+
+                        sb.AppendLine($"{timeFormatted} {who}: {body}");
                     }
                     userNameShow.Text = listBoxChats.SelectedItem.ToString();
                     ActualizarMensajesSinParpadeo(richTextBoxMensajes, sb.ToString(), scrollPos);
@@ -190,14 +217,143 @@ namespace WhatsAppClient
             public string Id { get; set; }
             public override string ToString() => Name;
         }
+        
+        protected override async void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                if (!timerNuevosMensajesIniciado)
+                {
+                    await InicializarUltimosMensajes();
+                    timerNuevosMensajes.Start();
+                    timerNuevosMensajesIniciado = true;
+                }
+            }
+            else
+            {
+                timerNuevosMensajes.Stop();
+                timerNuevosMensajesIniciado = false;
+            }
+        }
+
+        private async Task InicializarUltimosMensajes()
+        {
+            try
+            {
+                string response = await httpClient.GetStringAsync($"http://{ServerIP}/session/{sessionId}/chats");
+                var chats = JArray.Parse(response);
+
+                foreach (var chat in chats)
+                {
+                    string chatId = chat["id"].ToString();
+
+                    string msgResponse = await httpClient.GetStringAsync($"http://{ServerIP}/session/{sessionId}/messages/{chatId}");
+                    var json = JObject.Parse(msgResponse);
+                    var messages = (JArray)json["messages"];
+
+                    if (messages.Count > 0)
+                    {
+                        string ultimoBody = messages.Last["body"].ToString();
+                        ultimosMensajes[chatId] = ultimoBody;
+                    }
+                }
+            }
+            catch
+            {
+                // Ignorar errores de red iniciales
+            }
+        }
+
+        private async void TimerNuevosMensajes_Tick(object sender, EventArgs e)
+        {
+            if (timerNuevosMensajesEjecutandose) return; // evita solapamiento
+
+            timerNuevosMensajesEjecutandose = true;
+
+            if (string.IsNullOrWhiteSpace(sessionId))
+            {
+                timerNuevosMensajesEjecutandose = false;
+                return;
+            }
+
+            try
+            {
+                string response = await httpClient.GetStringAsync($"http://{ServerIP}/session/{sessionId}/chats");
+                var chats = JArray.Parse(response);
+
+                foreach (var chat in chats)
+                {
+                    string chatId = chat["id"].ToString();
+                    string chatName = chat["name"].ToString();
+
+                    string msgResponse = await httpClient.GetStringAsync($"http://{ServerIP}/session/{sessionId}/messages/{chatId}");
+                    var json = JObject.Parse(msgResponse);
+                    var messages = (JArray)json["messages"];
+
+                    if (messages.Count > 0)
+                    {
+                        string ultimoBody = messages.Last["body"].ToString();
+                        string from = messages.Last["from"].ToString();
+                        string userId = json["userId"].ToString();
+
+                        if (from != userId)
+                        {
+                            if (!ultimosMensajes.ContainsKey(chatId) || ultimosMensajes[chatId] != ultimoBody)
+                            {
+                                ultimosMensajes[chatId] = ultimoBody;
+
+                                if (this.WindowState == FormWindowState.Minimized)
+                                {
+                                    notifyIcon.BalloonTipTitle = $"Nuevo mensaje de {chatName}";
+                                    notifyIcon.BalloonTipText = ultimoBody;
+                                    notifyIcon.ShowBalloonTip(3000);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignorar errores temporales
+            }
+            finally
+            {
+                timerNuevosMensajesEjecutandose = false;
+            }
+        }
+
+
+        private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Normal; // Restaurar
+            this.Show(); // Asegurarse que se muestre
+            this.Activate(); // Darle foco
+        }
         private void MainForm_Load(object sender, EventArgs e)
         {
             IniciarTimerDeChats();
+
+            timerNuevosMensajes.Interval = 3000; // cada 3 segundos
+            timerNuevosMensajes.Tick += TimerNuevosMensajes_Tick;
+
+            notifyIcon = new NotifyIcon
+            {
+                Icon = SystemIcons.Information, // Podés cambiarlo por un ícono tuyo
+                Visible = true
+            };
+            // En el constructor o en Load()
+            notifyIcon.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
+
         }
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             timerActualizarChats?.Stop();
             timerActualizarChats?.Dispose();
+            timerNuevosMensajes?.Stop();
+            notifyIcon?.Dispose();
             Environment.Exit(0);
             Application.Exit(); // Cierra toda la aplicación, no solo el formulario
         }

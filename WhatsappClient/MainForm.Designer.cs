@@ -17,6 +17,7 @@ namespace WhatsAppClient
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.listBoxChats = new System.Windows.Forms.ListBox();
             this.txtMensaje = new System.Windows.Forms.TextBox();
@@ -26,6 +27,7 @@ namespace WhatsAppClient
             this.button3 = new System.Windows.Forms.Button();
             this.richTextBoxMensajes = new System.Windows.Forms.RichTextBox();
             this.userNameShow = new System.Windows.Forms.Label();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.SuspendLayout();
             // 
             // listBoxChats
@@ -57,7 +59,7 @@ namespace WhatsAppClient
             this.btnEnviar.Name = "btnEnviar";
             this.btnEnviar.Size = new System.Drawing.Size(72, 23);
             this.btnEnviar.TabIndex = 6;
-            this.btnEnviar.Text = "Enviar";
+            this.btnEnviar.Text = "Send";
             this.btnEnviar.UseVisualStyleBackColor = true;
             this.btnEnviar.Click += new System.EventHandler(this.btnEnviar_Click);
             // 
@@ -118,6 +120,11 @@ namespace WhatsAppClient
             this.userNameShow.Size = new System.Drawing.Size(0, 17);
             this.userNameShow.TabIndex = 11;
             // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Text = "notifyIcon";
+            this.notifyIcon1.Visible = true;
+            // 
             // MainForm
             // 
             this.AcceptButton = this.btnEnviar;
@@ -148,5 +155,6 @@ namespace WhatsAppClient
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.RichTextBox richTextBoxMensajes;
         private Label userNameShow;
+        private NotifyIcon notifyIcon1;
     }
 }
